@@ -1,0 +1,14 @@
+{
+  "short_name": "Secure Chat System",
+  "name": "Secure Chat System",
+  "icons": [
+    {
+      "src": "images/chat.jpg",
+      "sizes": "64x64",
+      "type": "image/jpg"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000"
+}
