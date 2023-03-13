@@ -1,0 +1,21 @@
+#landing-page {
+    display: flex;
+    flex-direction: row;
+    height: inherit;
+    background-color: #e8959e;
+}
+
+.image-col, .form-col {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-col {
+    background-color: white;
+}
+
+#chat-image {
+    max-width: 100%;   
+}
