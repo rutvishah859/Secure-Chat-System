@@ -1,0 +1,11 @@
+#sidebar {
+    height: inherit;
+    flex: 1;
+    border-right: 0.5px solid rgb(142, 142, 142);
+    background-color: #e8959e;
+}
+
+#chats {
+    overflow: auto;
+    height: calc(100% - 170px);
+}

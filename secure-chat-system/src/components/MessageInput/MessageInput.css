@@ -1,0 +1,13 @@
+#message-input {
+    display: flex;
+    flex-direction: row;
+    background-color: #e8959e;
+}
+
+#send-button {
+    overflow: hidden;
+}
+
+#message-field:hover {
+    outline: none;
+}

@@ -1,0 +1,17 @@
+.chat-details {
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    cursor: pointer;
+    margin-top: 5%;
+    padding: 20px;
+}
+
+.chat-details:hover {
+    background-color: #cf5c69;
+}
+
+.chat-details > div > p {
+    margin: 0;
+    font-size: small;
+}

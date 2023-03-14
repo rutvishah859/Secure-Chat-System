@@ -1,0 +1,25 @@
+#navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #cf5c69;
+    padding: 15px;
+    color: white;
+}
+
+#user-info{
+    display: flex;
+}
+
+#app-name {
+    font-weight: bold;
+}
+
+#user {
+    margin: 10px;
+}
+
+.vertical-align {
+    margin-top: auto;
+    margin-bottom: auto;
+}

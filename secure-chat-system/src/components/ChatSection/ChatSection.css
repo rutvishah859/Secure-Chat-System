@@ -1,0 +1,18 @@
+#chat-section {
+    height: inherit;
+    flex: 3;
+    background-color: rgb(247, 247, 247);
+}
+
+#chat-navbar {
+    display: flex;
+    flex-direction: row;
+    padding: 15px;
+    height: 42px;
+    background-color: #e8959e;
+}
+
+#vertical-align {
+    margin-top: auto;
+    margin-bottom: auto;
+}
