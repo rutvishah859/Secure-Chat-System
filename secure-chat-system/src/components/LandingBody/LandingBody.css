@@ -5,3 +5,15 @@
     border-radius: 5px;
     width: 50%;
 }
+
+.app-title {
+    text-align: center;
+    color: #32376f;
+    margin-top: auto;
+    margin-bottom: 0;
+}
+
+.form-label {
+    color: #32376f;
+    margin-top: 3%;
+}
