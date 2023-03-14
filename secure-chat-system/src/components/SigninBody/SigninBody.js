@@ -10,7 +10,8 @@ const SigninBody = () => {
             <TextField
                 required
                 id="outlined"
-                label="Username"
+                label="Email"
+                type="email"
                 fullWidth={true}
             />
             <br/>
