@@ -9,7 +9,7 @@ import { Avatar } from "@mui/material";
 
 const Search = () => {
     const [name, setName] = useState("");
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState(null);
     const [err, setError] = useState(false);
 
     const { currentUser } = useContext(AuthContext);
@@ -55,28 +55,31 @@ const Search = () => {
         }
 
         try {
-            const response = await getDoc(doc(db, "chats", mergedIds));
-            
+            const docRef = doc(db, "chats", mergedIds);
+            const response = await getDoc(docRef);
+
             if (!response.exists()) {
-                await setDoc(doc(db, "chats", mergedIds), {messages: []});
+                await setDoc(docRef, {messages: []});
+                console.log(currentUser?.uid);
+                console.log(user?.displayName);
+                console.log(user?.uid);
 
-                await updateDoc(doc(db, "userChats", currentUser.uid), {
+                await updateDoc(doc(db, "userChats", currentUser?.uid), {
                     [mergedIds + ".userInfo"]: {
-                        uid: user.uid,
-                        displayName: user.displayName
+                        uid: user?.uid,
+                        displayName: `${user?.firstName} ${user?.lastName}`
                     },
                     [mergedIds + ".date"]: serverTimestamp(),
-                });
+                })
 
-                await updateDoc(doc(db, "userChats", user.uid), {
+                await updateDoc(doc(db, "userChats", user?.uid), {
                     [mergedIds + ".userInfo"]: {
-                        uid: currentUser.uid,
-                        displayName: currentUser.displayName
+                        uid: currentUser?.uid,
+                        displayName: currentUser?.displayName
                     },
                     [mergedIds + ".date"]: serverTimestamp(),
-                });
+                })
             }
-            return true;
         } catch(err){
             console.log(err);
             setError(true);
