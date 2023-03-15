@@ -1,5 +1,7 @@
 import { Avatar } from "@mui/material";
-import React, { useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import React, { useContext, useEffect, useState } from "react";
 import "./Chat.css";
 
 function stringToColor(string) {
@@ -30,15 +32,33 @@ function stringAvatar(name) {
 }
 
 const Chat = ({firstName, lastName, latestMessage}) => {
-    return(
-        <div className="chat-details">
-            <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${firstName} ${lastName}`)} className="vertical-align"/>
-            <div>
-                <span><b>{`${firstName} ${lastName}`}</b></span>
-                <p>{latestMessage}</p>
-            </div>
-        </div>
-    );
+  // const [chats, setChats] = useState([]);
+  // const { currentUser } = useContext(AuthContext);
+  // const { dispatch } = useContext(ChatContext);
+
+  // useEffect(() => {
+  //   const getChats = () => {
+  //     const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
+  //       setChats(doc.data());
+  //     });
+
+  //     return () => {
+  //       unsub();
+  //     };
+  //   };
+
+  //   currentUser.uid && getChats();
+  // }, [currentUser.uid]);
+  
+  return(
+    <div className="chat-details">
+      <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${firstName} ${lastName}`)} className="vertical-align"/>
+      <div>
+        <span><b>{`${firstName} ${lastName}`}</b></span>
+        <p>{latestMessage}</p>
+      </div>
+    </div>
+  );
 };
 
 export default Chat;

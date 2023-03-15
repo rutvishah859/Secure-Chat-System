@@ -29,13 +29,13 @@ function stringAvatar(name) {
     };
 }
 
-const NavBar = ({firstName, lastName}) => {
+const NavBar = ({displayName}) => {
     return(
         <div id="navbar">  
             <h2 id="app-name" className="vertical-align">Chatr</h2>
             <div id="user-info">
-              <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${firstName} ${lastName}`)} className="vertical-align"/>
-              <span id="user">{`${firstName} ${lastName}`}</span>
+              <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${displayName}`)} className="vertical-align"/>
+              <span id="user">{`${displayName}`}</span>
             </div>
         </div>
     );

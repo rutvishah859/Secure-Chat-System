@@ -50,13 +50,13 @@ const LandingBody = () => {
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                <h2 class="app-title">Chatr</h2>
-                <h3 class="form-label">Sign In</h3>
+                <h2 className="app-title">Chatr</h2>
+                <h3 className="form-label">Sign In</h3>
                 <SigninBody />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <h2 class="app-title">Chatr</h2>
-                <h3 class="form-label">Sign Up</h3>
+                <h2 className="app-title">Chatr</h2>
+                <h3 className="form-label">Sign Up</h3>
                 <SignupBody />
             </TabPanel>
         </Box>

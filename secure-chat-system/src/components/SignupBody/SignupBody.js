@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase"
 import { doc, setDoc } from "firebase/firestore"; 
 import "./SignupBody.css";
@@ -18,11 +18,15 @@ const SignupBody = () => {
         
         let email = formState?.email;
         let password = formState?.password;
-
-        const response = await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+        
+        await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
             // Signed in 
             const user = userCredential.user;
-            
+
+            await updateProfile(user, {
+                displayName: `${formState?.firstName} ${formState?.lastName}`
+            })
+
             // create a user in the user doc
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,

@@ -5,16 +5,21 @@ import { createContext, useEffect, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthContextProvider = (({children}) => {
-    const [user, setUser] = useState();
+    const [currentUser, setCurrentUser] = useState();
 
     useEffect(() => {
-        onAuthStateChanged(auth, (usr) => {
-            setUser(usr);
+        const unsub = onAuthStateChanged(auth, (usr) => {
+            setCurrentUser(usr);
         });
+
+        return () => {
+            unsub();
+        };
+        
     }, []);
 
     return (
-        <AuthContext.Provider value={{user}}>
+        <AuthContext.Provider value={{currentUser}}>
             {children}
         </AuthContext.Provider>
     );
