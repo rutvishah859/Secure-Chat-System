@@ -2,6 +2,7 @@ import { Avatar } from "@mui/material";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import "./Chat.css";
 
 function stringToColor(string) {
@@ -32,31 +33,36 @@ function stringAvatar(name) {
 }
 
 const Chat = ({firstName, lastName, latestMessage}) => {
-  // const [chats, setChats] = useState([]);
-  // const { currentUser } = useContext(AuthContext);
-  // const { dispatch } = useContext(ChatContext);
+  const [chats, setChats] = useState([]);
+  const { currentUser } = useContext(AuthContext);
 
-  // useEffect(() => {
-  //   const getChats = () => {
-  //     const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
-  //       setChats(doc.data());
-  //     });
+  useEffect(() => {
+    const getChats = () => {
+      const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
+        setChats(doc.data());
+      });
 
-  //     return () => {
-  //       unsub();
-  //     };
-  //   };
+      return () => {
+        unsub();
+      };
+    };
 
-  //   currentUser.uid && getChats();
-  // }, [currentUser.uid]);
+    if (currentUser.uid) {
+      getChats();
+    }
+  }, [currentUser.uid]);
+  
+  console.log(Object.entries(chats));
   
   return(
-    <div className="chat-details">
-      <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${firstName} ${lastName}`)} className="vertical-align"/>
-      <div>
-        <span><b>{`${firstName} ${lastName}`}</b></span>
-        <p>{latestMessage}</p>
-      </div>
+    <div className="userChats">
+      {Object.entries(chats)?.map((chat) => (
+        <div className="chat-details" key={chat[0]}>
+          <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${chat[1].userInfo.displayName}`)} className="vertical-align"/>
+          <span><b>{chat[1].userInfo.displayName}</b></span>
+          <p>{chat[1].userInfo.latestMessage?.text}</p>
+        </div>
+      ))}
     </div>
   );
 };
