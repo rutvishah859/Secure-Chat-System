@@ -16,14 +16,13 @@ const Search = () => {
     const { currentUser } = useContext(AuthContext);
 
     let firstname = `${currentUser.displayName.split(' ')[0]}`
-    // let lowername = name.toLowerCase()
-    firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
+    firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1).toLowerCase();
     
     const handleSearch = async () => {
         const q = query(
             collection(db, "users"),
-            where ("firstName", "==", name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()),
-            where ("firstName", "!=", firstname.charAt(0).toUpperCase() + name.slice(1).toLowerCase()),
+            where ("firstName", "==", name),
+            where ("firstName", "!=", firstname),
         );
 
         try {
@@ -36,10 +35,6 @@ const Search = () => {
             console.log(err);
             setError(true);
         }  
-    };
-
-    const handleKey = () => {
-        handleSearch();
     };
 
     // handle the selection of a user from search
@@ -120,7 +115,7 @@ const Search = () => {
     
     return(
         <div id="search">
-            <TextField fullWidth id="standard-basic" label="Find a User" variant="standard" onKeyDown={handleKey} onChange={({target})=>setName(target.value)}/>
+            <TextField fullWidth id="standard-basic" label="Find a User" variant="standard" onKeyDown={handleSearch} onChange={({target})=>setName(target.value.charAt(0).toUpperCase() + target.value.slice(1).toLowerCase())}/>
             {err && <span>No users found</span>}
             {user && (
                 <div className="chat-details" onClick={handleUserSelect}>
