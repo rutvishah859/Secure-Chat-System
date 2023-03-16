@@ -18,7 +18,7 @@ const SideBar = () => {
             <Search/>
             {/* TODO:map according to how many messages a particular user has */}
             <div id="chats">
-                <Chat firstName="Rutvi" lastName="Shah" latestMessage="Sup bb"/>
+                <Chat />
             </div>
 
             <Button size="small" variant="contained" onClick={ ()=>signOut(auth) }

@@ -7,10 +7,15 @@ import { TextField } from "@mui/material";
 import Button from '@mui/material/Button';
 import { useNavigate } from "react-router-dom";
 
+// import firebase from 'firebase';
+// import { EThree } from '@virgilsecurity/e3kit-browser'; // or 'e3kit-native'
+
 const SignupBody = () => {
     const [formState, setFormState] = useState({});
     const [error, setError] = useState(false);
     const navigate = useNavigate();
+
+    // const functions = require('firebase-functions');
 
     //  Register the user on submit
     const handleSubmit = async (e) => {
@@ -25,7 +30,7 @@ const SignupBody = () => {
 
             await updateProfile(user, {
                 displayName: `${formState?.firstName} ${formState?.lastName}`
-            })
+            });
 
             // create a user in the user doc
             await setDoc(doc(db, "users", user.uid), {
@@ -34,6 +39,12 @@ const SignupBody = () => {
                 lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
                 email: formState?.email
             });
+
+            // exports.beforeSignUp = functions.auth.user().onBeforeCreate(async (user) => {
+            //     const ip = user.metadata.lastSignInIp;
+
+            //     await admin.auth().setCustomUserClaims(user.uid, {ip : ip});
+            // });
 
             await setDoc(doc(db, "userChats", user.uid), {});
             navigate("/home");
@@ -52,7 +63,7 @@ const SignupBody = () => {
                 className="outlined"
                 label="First Name"
                 fullWidth
-                onChange={({target}) => setFormState({...formState, firstName: target.value})}
+                onChange={({target}) => setFormState({...formState, firstName: target.value.charAt(0).toUpperCase() + target.value.slice(1).toLowerCase()})}
             />
             <br/>
             <TextField
@@ -60,7 +71,7 @@ const SignupBody = () => {
                 className="outlined"
                 label="Last Name"
                 fullWidth
-                onChange={({target}) => setFormState({...formState, lastName: target.value})}
+                onChange={({target}) => setFormState({...formState, lastName: target.value.charAt(0).toUpperCase() + target.value.slice(1).toLowerCase()})}
             />
             <br/>
             <TextField
