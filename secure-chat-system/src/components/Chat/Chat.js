@@ -60,12 +60,14 @@ const Chat = () => {
 
   return(
     <div className="userChats">
-      {Object.entries(chats)?.map((chat) => (
+      {Object.entries(chats)?.sort((a,b)=>b[1].date - a[1].date).map((chat) => (
+
         <div className="chat-details" key={chat[0]} onClick={() => handleSelect(chat[1].userInfo)}>
           <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${chat[1].userInfo.displayName}`)} className="vertical-align"/>
           <span><b>{chat[1].userInfo.displayName}</b></span>
           <p>{chat[1].userInfo.latestMessage?.text}</p>
         </div>
+
       ))}
     </div>
   );

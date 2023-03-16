@@ -1,11 +1,9 @@
 import React, { useContext } from "react";
-import { UserContext } from "../../context/UserContext";
 import { AuthContext } from "../../context/AuthContext";
 import "./Message.css";
 
 const Message = ({time, message, owner=false}) => {
     const { currentUser } = useContext(AuthContext);
-    const { data } = useContext(UserContext);
     
     return(
         <div className={`message ${message?.senderId === currentUser?.uid ? "owner" : ''}`}>
