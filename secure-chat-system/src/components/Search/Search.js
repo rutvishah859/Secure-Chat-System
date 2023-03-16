@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import TextField from '@mui/material/TextField';
+import Autocomplete from "@mui/material/Autocomplete";
 import "./Search.css";
 import { collection, query, where, setDoc, getDocs, getDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -15,29 +16,30 @@ const Search = () => {
     const { currentUser } = useContext(AuthContext);
 
     let firstname = `${currentUser.displayName.split(' ')[0]}`
-    let lowername = name.toLowerCase()
+    // let lowername = name.toLowerCase()
+    firstname = firstname.charAt(0).toUpperCase() + firstname.slice(1);
     
     const handleSearch = async () => {
         const q = query(
             collection(db, "users"),
-            where ("firstName", "==", name),
-            where ("firstName", "!=", firstname),
+            where ("firstName", "==", name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()),
+            where ("firstName", "!=", firstname.charAt(0).toUpperCase() + name.slice(1).toLowerCase()),
         );
 
         try {
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((doc) => {
+            const results = await getDocs(q);
+            results.forEach((doc) => {
                 console.log(doc.id, '=>', doc.data());
                 setUser(doc.data());
             });
-            } catch(err) {
-                console.log(err);
-                setError(true);
+        } catch(err) {
+            console.log(err);
+            setError(true);
         }  
     };
 
-    const handleKey = (e) => {
-        e.code === "Enter" && handleSearch();
+    const handleKey = () => {
+        handleSearch();
     };
 
     // handle the selection of a user from search
@@ -126,7 +128,7 @@ const Search = () => {
                     <span><b>{`${user?.firstName} ${user?.lastName}`}</b></span>
                 </div>
             )}
-        </div>
+        </div>  
     );
 };
 

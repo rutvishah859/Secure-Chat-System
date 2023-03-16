@@ -4,6 +4,7 @@ import { db } from "../../firebase/firebase";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import "./Chat.css";
+import { UserContext } from "../../context/UserContext";
 
 function stringToColor(string) {
     let hash = 0;
@@ -32,9 +33,10 @@ function stringAvatar(name) {
     };
 }
 
-const Chat = ({firstName, lastName, latestMessage}) => {
+const Chat = () => {
   const [chats, setChats] = useState([]);
   const { currentUser } = useContext(AuthContext);
+  const { dispatch } = useContext(UserContext);
 
   useEffect(() => {
     const getChats = () => {
@@ -52,12 +54,14 @@ const Chat = ({firstName, lastName, latestMessage}) => {
     }
   }, [currentUser.uid]);
   
-  console.log(Object.entries(chats));
-  
+  const handleSelect = (user) => {
+    dispatch({type: "CHANGE_USER", payload: user})
+  }
+
   return(
     <div className="userChats">
       {Object.entries(chats)?.map((chat) => (
-        <div className="chat-details" key={chat[0]}>
+        <div className="chat-details" key={chat[0]} onClick={() => handleSelect(chat[1].userInfo)}>
           <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${chat[1].userInfo.displayName}`)} className="vertical-align"/>
           <span><b>{chat[1].userInfo.displayName}</b></span>
           <p>{chat[1].userInfo.latestMessage?.text}</p>

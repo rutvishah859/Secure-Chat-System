@@ -7,7 +7,7 @@ const ChatPage = () => {
     return(
         <div id="chat-page">
             <SideBar />
-            <ChatSection firstName="Rutvi" lastName="Shah"/>
+            <ChatSection />
         </div>
     );
 };

@@ -30,8 +30,8 @@ const SignupBody = () => {
             // create a user in the user doc
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
-                firstName: formState?.firstName,
-                lastName: formState?.lastName,
+                firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
+                lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
                 email: formState?.email
             });
 
