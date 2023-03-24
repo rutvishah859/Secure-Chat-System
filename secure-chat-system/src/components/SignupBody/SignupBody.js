@@ -60,16 +60,15 @@ const SignupBody = () => {
                     lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
                     email: formState?.email
                 });
+                
+                await setDoc(doc(db, "userChats", user.uid), {});
 
                 const keyPair = await generateRSAKeyPair();
 
-                localStorage.setItem(`privKey-${currentUser.uid}`, keyPair.privateKey);
-    
                 await setDoc(doc(db, "pubKeys", user.uid), {
                     pubKey: keyPair.publicKey
                 });
-    
-                await setDoc(doc(db, "userChats", user.uid), {});
+
                 navigate("/home");
             })
         }).catch((error) => {
