@@ -1,14 +1,12 @@
 import React, { useState } from "react";
+import axios from 'axios';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase"
-import { doc, setDoc } from "firebase/firestore"; 
+import { arrayUnion, doc, setDoc } from "firebase/firestore"; 
 import "./SignupBody.css";
 import { TextField } from "@mui/material";
 import Button from '@mui/material/Button';
 import { useNavigate } from "react-router-dom";
-
-// import firebase from 'firebase';
-// import { EThree } from '@virgilsecurity/e3kit-browser'; // or 'e3kit-native'
 
 const SignupBody = () => {
     const [formState, setFormState] = useState({});
@@ -23,33 +21,33 @@ const SignupBody = () => {
         
         let email = formState?.email;
         let password = formState?.password;
-        
-        await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
-            // Signed in 
-            const user = userCredential.user;
+        let ip = ''
 
-            await updateProfile(user, {
-                displayName: `${formState?.firstName} ${formState?.lastName}`
-            });
-
-            // create a user in the user doc
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
-                lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
-                email: formState?.email
-            });
-
-            // exports.beforeSignUp = functions.auth.user().onBeforeCreate(async (user) => {
-            //     const ip = user.metadata.lastSignInIp;
-
-            //     await admin.auth().setCustomUserClaims(user.uid, {ip : ip});
-            // });
-
-            await setDoc(doc(db, "userChats", user.uid), {});
-            navigate("/home");
-        })
-        .catch((error) => {
+        // get user IP
+        await axios.get('https://geolocation-db.com/json/').then((res) => {
+            ip = res.data.IPv4;
+        }).then(async () => {
+            await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+    
+                await updateProfile(user, {
+                    displayName: `${formState?.firstName} ${formState?.lastName}`
+                });
+    
+                // create a user in the user doc
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    ips: arrayUnion(ip),
+                    firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
+                    lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
+                    email: formState?.email
+                });
+    
+                await setDoc(doc(db, "userChats", user.uid), {});
+                navigate("/home");
+            })
+        }).catch((error) => {
             setError(true);
             const errorCode = error.code;
             const errorMessage = error.message;
