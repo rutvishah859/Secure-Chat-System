@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import axios from 'axios';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { app, auth, db } from "../../firebase/firebase"
-import { doc, setDoc } from "firebase/firestore"; 
+import { arrayUnion, doc, setDoc } from "firebase/firestore"; 
 import "./SignupBody.css";
 import { TextField } from "@mui/material";
 import Button from '@mui/material/Button';
@@ -37,35 +38,41 @@ const SignupBody = () => {
         
         let email = formState?.email;
         let password = formState?.password;
-        
-        await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
-            // Signed in 
-            const user = userCredential.user;
+        let ip = ''
 
-            await updateProfile(user, {
-                displayName: `${formState?.firstName} ${formState?.lastName}`
-            });
+        // get user IP
+        await axios.get('https://geolocation-db.com/json/').then((res) => {
+            ip = res.data.IPv4;
+        }).then(async () => {
+            await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+    
+                await updateProfile(user, {
+                    displayName: `${formState?.firstName} ${formState?.lastName}`
+                });
+    
+                // create a user in the user doc
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    ips: arrayUnion(ip),
+                    firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
+                    lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
+                    email: formState?.email
+                });
 
-            // create a user in the user doc
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
-                lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
-                email: formState?.email
-            });
+                const keyPair = await generateRSAKeyPair();
 
-            const keyPair = await generateRSAKeyPair();
-
-            localStorage.setItem(`privKey-${currentUser.uid}`, keyPair.privateKey);
-
-            await setDoc(doc(db, "pubKeys", user.uid), {
-                pubKey: keyPair.publicKey
-            });
-
-            await setDoc(doc(db, "userChats", user.uid), {});
-            navigate("/home");
-        })
-        .catch((error) => {
+                localStorage.setItem(`privKey-${currentUser.uid}`, keyPair.privateKey);
+    
+                await setDoc(doc(db, "pubKeys", user.uid), {
+                    pubKey: keyPair.publicKey
+                });
+    
+                await setDoc(doc(db, "userChats", user.uid), {});
+                navigate("/home");
+            })
+        }).catch((error) => {
             setError(true);
             const errorCode = error.code;
             const errorMessage = error.message;
