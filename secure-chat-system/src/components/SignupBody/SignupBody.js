@@ -1,21 +1,35 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, db } from "../../firebase/firebase"
+import { app, auth, db } from "../../firebase/firebase"
 import { doc, setDoc } from "firebase/firestore"; 
 import "./SignupBody.css";
 import { TextField } from "@mui/material";
 import Button from '@mui/material/Button';
 import { useNavigate } from "react-router-dom";
+import forge from "node-forge";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
-// import firebase from 'firebase';
-// import { EThree } from '@virgilsecurity/e3kit-browser'; // or 'e3kit-native'
+
+export const generateRSAKeyPair = async() => {
+    return new Promise((resolve, reject) => {
+        forge.pki.rsa.generateKeyPair({ bits: 2048 }, (err, keypair) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({
+                    publicKey: forge.pki.publicKeyToPem(keypair.publicKey),
+                    privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
+                });
+            }
+        });
+    });
+}
 
 const SignupBody = () => {
     const [formState, setFormState] = useState({});
     const [error, setError] = useState(false);
     const navigate = useNavigate();
-
-    // const functions = require('firebase-functions');
 
     //  Register the user on submit
     const handleSubmit = async (e) => {
@@ -40,11 +54,13 @@ const SignupBody = () => {
                 email: formState?.email
             });
 
-            // exports.beforeSignUp = functions.auth.user().onBeforeCreate(async (user) => {
-            //     const ip = user.metadata.lastSignInIp;
+            const keyPair = await generateRSAKeyPair();
 
-            //     await admin.auth().setCustomUserClaims(user.uid, {ip : ip});
-            // });
+            localStorage.setItem(`privKey-${currentUser.uid}`, keyPair.privateKey);
+
+            await setDoc(doc(db, "pubKeys", user.uid), {
+                pubKey: keyPair.publicKey
+            });
 
             await setDoc(doc(db, "userChats", user.uid), {});
             navigate("/home");

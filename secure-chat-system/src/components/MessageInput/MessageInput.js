@@ -7,19 +7,46 @@ import { db } from "../../firebase/firebase";
 import { AuthContext } from "../../context/AuthContext";
 import { UserContext } from "../../context/UserContext";
 import { v4 as uuid } from "uuid";
+import forge from 'node-forge';
+import { getDoc } from "firebase/firestore";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const { currentUser } = useContext(AuthContext);
     const { data } = useContext(UserContext);
 
+    const encryptMessage = (message, publicKeyPem) => {
+        const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+        const messageBytes = forge.util.encodeUtf8(message);
+        const encrypted = publicKey.encrypt(messageBytes, 'RSA-OAEP');
+      
+        return forge.util.encode64(encrypted);
+      };
+
+    const getPublicKey = async (userId) => {
+        const publicKeyDoc = await getDoc(doc(db, "pubKeys", userId));
+        const publicKeyData = publicKeyDoc.data();
+        console.log(publicKeyDoc);
+        if (publicKeyData && publicKeyData.pubKey) {
+            return publicKeyData.pubKey;
+        } else {
+            return null;
+        }
+    };
+
     const handleSend = async () => {
+        const pubKey = await getPublicKey(currentUser.uid);
+        console.log(currentUser.uid);
+        const encrypMessage = await encryptMessage(text, pubKey);
+        
+        console.log(data.chatId)
         await updateDoc(doc(db, "chats", data.chatId), {
             messages: arrayUnion({
                 id: uuid(),
-                text: text,
+                text: encrypMessage,
                 senderId: currentUser.uid,
-                date: Timestamp.now()
+                date: Timestamp.now(),
+                encrypted: true,
             })
         })
 

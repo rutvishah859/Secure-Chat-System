@@ -4,6 +4,9 @@ import "./Message.css";
 
 const Message = ({time, message, owner=false}) => {
     const { currentUser } = useContext(AuthContext);
+
+    const privateKey = localStorage.getItem(`privateKey-${currentUser.uid}`);
+    console.log(privateKey)
     
     return(
         <div className={`message ${message?.senderId === currentUser?.uid ? "owner" : ''}`}>
