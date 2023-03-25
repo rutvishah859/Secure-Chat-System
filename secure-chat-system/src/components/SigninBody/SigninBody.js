@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SigninBody.css";
 import { TextField } from "@mui/material";
 import Button from '@mui/material/Button';
 import {signInWithEmailAndPassword} from "firebase/auth";
+import { AuthContext } from "../../context/AuthContext";
 import { auth, db } from "../../firebase/firebase";
 import { getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import SignupBody, { getGenerateMasterKey } from "../SignupBody/SignupBody";
 import axios from "axios";
 import emailjs from '@emailjs/browser';
+import { scrypt } from 'scrypt-js';
 
 const SigninBody = () => {
     const [formState, setFormState] = useState({});
@@ -18,14 +21,40 @@ const SigninBody = () => {
     const [twoWayAuthCode, setTwoWayAuthCode] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const navigate = useNavigate();
+    const { currentUser } = useContext(AuthContext);
+
+    // const getSalt = async (userId) => {
+    //     const salt = await getDoc(doc(db, "users", userId));
+    //     const saltData = saltData.data();
+        
+    //     if (publicKeyData && publicKeyData.salt) {
+    //         return publicKeyData.pubKey;
+    //     } else {
+    //         return null;
+    //     }
+    // };
+
+    // Generate a master key from the password
+    const generateMasterKey = async (password, userID) => {
+        const salt = await getDoc(doc(db, "users", userID));
+        const saltData = salt.data()?.salt;
+
+        //const salt = uuidv4();
+        const passwordBytes = new TextEncoder().encode(password);
+        const saltBytes = new TextEncoder().encode(saltData);
+        const key = await scrypt(passwordBytes, saltBytes, 32768, 8, 1, 32); // Derive key from password and salt using scrypt
+        const masterKey = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, "0")).join(""); // Convert key to hex string for storage
+        
+        return { masterKey };
+    };
 
     //  Register the user on submit
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {        
         e.preventDefault();
         
         let email = formState?.email;
         let password = formState?.password;
-        
+
         signInWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
             const userID = userCredential.user.uid;
             setUid(userID);
@@ -67,12 +96,16 @@ const SigninBody = () => {
                         console.log(error.text);
                     });
                 }
-                
             });
+
+            const { masterKey } = await generateMasterKey(password, userID);
+            localStorage.setItem('masterKey', masterKey);
+
         }).catch((error) => {
             setError(true);
             const errorCode = error.code;
             const errorMessage = error.message;
+            console.log(errorMessage);
         });
     };
 

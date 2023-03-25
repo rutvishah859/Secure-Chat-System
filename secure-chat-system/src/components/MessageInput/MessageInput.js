@@ -21,12 +21,12 @@ const MessageInput = () => {
         const encrypted = publicKey.encrypt(messageBytes, 'RSA-OAEP');
       
         return forge.util.encode64(encrypted);
-      };
+    };
 
     const getPublicKey = async (userId) => {
-        const publicKeyDoc = await getDoc(doc(db, "pubKeys", userId));
+        const publicKeyDoc = await getDoc(doc(db, "users", userId));
         const publicKeyData = publicKeyDoc.data();
-        console.log(publicKeyDoc);
+        
         if (publicKeyData && publicKeyData.pubKey) {
             return publicKeyData.pubKey;
         } else {
@@ -35,42 +35,63 @@ const MessageInput = () => {
     };
 
     const handleSend = async () => {
-        const pubKey = await getPublicKey(currentUser.uid);
-        console.log(currentUser.uid);
-        const encrypMessage = await encryptMessage(text, pubKey);
-        
-        console.log(data.chatId)
-        await updateDoc(doc(db, "chats", data.chatId), {
-            messages: arrayUnion({
-                id: uuid(),
-                text: encrypMessage,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                encrypted: true,
-            })
-        })
+        try {
+            // encrypt for the sender (current user)
+            const senderPubKey = await getPublicKey(currentUser.uid);
+            const senderEncryptMsg = await encryptMessage(text, senderPubKey);
+            
+            // encrypt for the receiver
+            const receiverPubKey = await getPublicKey(data.user.uid);
+            const receiverEncryptMsg = await encryptMessage(text, receiverPubKey);
+            
+            await updateDoc(doc(db, "chats", data.chatId), {
+                messages: arrayUnion({
+                    id: uuid(),
+                    date: Timestamp.now(),
+                    encrypted: true,
+                    senderId: currentUser.uid,
+                    senderText: senderEncryptMsg,
+                    receiverId: data.user.uid,
+                    receiverText: receiverEncryptMsg,
+                }),
+            });
 
-        await updateDoc(doc(db, "userChats", currentUser.uid), {
-            [data.chatId + ".lastMessage"]: {
-                text: text,
-            },
-            [data.chatId + ".date"]: serverTimestamp(),
-        });
-      
-        await updateDoc(doc(db, "userChats", data.user.uid), {
-            [data.chatId + ".lastMessage"]: {
-                text: text,
-            },
-            [data.chatId + ".date"]: serverTimestamp(),
-        });
-      
-        setText("");
+            // await updateDoc(doc(db, "userChats", currentUser.uid), {
+            //     [data.chatId + ".lastMessage"]: {
+            //         senderText: text,
+            //     },
+            //     [data.chatId + ".date"]: serverTimestamp(),
+            // });
+        
+            // await updateDoc(doc(db, "userChats", data.user.uid), {
+            //     [data.chatId + ".lastMessage"]: {
+            //         text: text,
+            //     },
+            //     [data.chatId + ".date"]: serverTimestamp(),
+            // });
+        
+            setText("");
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     return(
         <div id="message-input">
             <FormControl sx={{ width: "90%" }}>
-                <OutlinedInput sx={{borderRadius: "0"}} id="message-field" placeholder="Enter your message..." value={text} onChange={({target})=>setText(target.value)} />
+                <OutlinedInput 
+                    sx={{borderRadius: "0"}} 
+                    id="message-field" 
+                    placeholder="Enter your message..." 
+                    value={text} 
+                    onChange={({target})=>setText(target.value)} 
+                    onKeyDown={(event) => {
+                        if (event.keyCode === 13) {
+                            handleSend();
+                        }
+                    }}
+                    disabled={data.chatId === "null" || data.chatId === ""}
+                />
             </FormControl>
             <div id="send-btn">
                 <Button fullWidth variant="contained" onClick={handleSend}

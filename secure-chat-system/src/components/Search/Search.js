@@ -28,11 +28,9 @@ const Search = () => {
         try {
             const results = await getDocs(q);
             results.forEach((doc) => {
-                console.log(doc.id, '=>', doc.data());
                 setUser(doc.data());
             });
         } catch(err) {
-            console.log(err);
             setError(true);
         }  
     };
@@ -57,9 +55,6 @@ const Search = () => {
 
             if (!response.exists()) {
                 await setDoc(docRef, {messages: []});
-                console.log(currentUser?.uid);
-                console.log(user?.displayName);
-                console.log(user?.uid);
 
                 await updateDoc(doc(db, "userChats", currentUser?.uid), {
                     [mergedIds + ".userInfo"]: {

@@ -23,7 +23,7 @@ const Messages = () => {
     return(
         <div id="messages">
             {messages.map(msg => (
-                <Message key={msg.id} time={(msg.date).toDate()} message={msg} owner={true} />
+                <Message key={msg.id} time={(msg.date).toDate()} message={msg} />
             ))}
         </div>
     );

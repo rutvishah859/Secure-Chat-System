@@ -1,6 +1,6 @@
 import { Avatar } from "@mui/material";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import "./Chat.css";
@@ -37,6 +37,7 @@ const Chat = () => {
   const [chats, setChats] = useState([]);
   const { currentUser } = useContext(AuthContext);
   const { dispatch } = useContext(UserContext);
+  const { data } = useContext(UserContext);
 
   useEffect(() => {
     const getChats = () => {
@@ -54,10 +55,12 @@ const Chat = () => {
     if (currentUser.uid) {
       getChats();
     }
+
   }, [currentUser.uid]);
   
   const handleSelect = (user) => {
-    dispatch({type: "CHANGE_USER", payload: user})
+    console.log(user);
+    dispatch({type: "CHANGE_USER", payload: user});
   }
 
   return(
@@ -67,7 +70,7 @@ const Chat = () => {
         <div className="chat-details" key={chat[0]} onClick={() => handleSelect(chat[1].userInfo)}>
           <Avatar sx={{width: 24, height: 24}} {...stringAvatar(`${chat[1].userInfo.displayName}`)} className="vertical-align"/>
           <span><b>{chat[1].userInfo.displayName}</b></span>
-          <p>{chat[1].userInfo.latestMessage}</p>
+          {/* <p>{chat[1].userInfo.latestMessage}</p> */}
         </div>
 
       ))}

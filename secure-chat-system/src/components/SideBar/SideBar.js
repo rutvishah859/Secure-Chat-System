@@ -5,23 +5,25 @@ import Search from "../Search/Search";
 import Chat from "../Chat/Chat";
 import { signOut } from "firebase/auth"
 import { auth } from "../../firebase/firebase"
+import { UserContext } from '../../context/UserContext';
 import { AuthContext } from "../../context/AuthContext";
 import React, { useContext } from 'react';
 
 
 const SideBar = () => {
     const {currentUser} = useContext(AuthContext);
+    const { dispatch } = useContext(UserContext);
 
     return(
         <div id="sidebar">
             <NavBar displayName={`${currentUser.displayName}`}/>
             <Search/>
-            {/* TODO:map according to how many messages a particular user has */}
+
             <div id="chats">
                 <Chat />
             </div>
 
-            <Button size="small" variant="contained" onClick={ ()=>signOut(auth) }
+            <Button size="small" variant="contained" onClick={ () => signOut(auth, localStorage.clear(), dispatch({type: "CLEAR_CHAT_HISTORY"}))}
               sx={{
                 cursor: "pointer", 
                 fontSize: "10px", 

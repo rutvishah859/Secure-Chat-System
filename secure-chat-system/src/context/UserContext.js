@@ -23,7 +23,10 @@ export const UserContextProvider = (({children}) => {
                   ? currentUser.uid + action.payload.uid
                   : action.payload.uid + currentUser.uid,
             };
-    
+            case "CLEAR_CHAT_HISTORY":
+              return {
+                ...INITIAL_STATE,
+              };
           default:
             return state;
         }

@@ -10,9 +10,12 @@ import { useNavigate } from "react-router-dom";
 import forge from "node-forge";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import { scrypt } from 'scrypt-js';
+const { v4: uuidv4 } = require('uuid');
+import * as CryptoJS from 'crypto-js';
 
 
-export const generateRSAKeyPair = async() => {
+const generateRSAKeyPair = async() => {
     return new Promise((resolve, reject) => {
         forge.pki.rsa.generateKeyPair({ bits: 2048 }, (err, keypair) => {
             if (err) {
@@ -24,6 +27,7 @@ export const generateRSAKeyPair = async() => {
                 });
             }
         });
+       
     });
 }
 
@@ -31,6 +35,16 @@ const SignupBody = () => {
     const [formState, setFormState] = useState({});
     const [error, setError] = useState(false);
     const navigate = useNavigate();
+
+    // Generate a master key from the password
+    const generateMasterKey = async (password) => {
+        const salt = uuidv4();
+        const passwordBytes = new TextEncoder().encode(password);
+        const saltBytes = new TextEncoder().encode(salt);
+        const key = await scrypt(passwordBytes, saltBytes, 32768, 8, 1, 32); // Derive key from password and salt using scrypt
+        const masterKey = Array.from(new Uint8Array(key)).map(b => b.toString(16).padStart(2, "0")).join(""); // Convert key to hex string for storage
+        return { masterKey, salt };
+    };
 
     //  Register the user on submit
     const handleSubmit = async (e) => {
@@ -44,6 +58,12 @@ const SignupBody = () => {
         await axios.get('https://geolocation-db.com/json/').then((res) => {
             ip = res.data.IPv4;
         }).then(async () => {
+
+            const keyPair = await generateRSAKeyPair();
+
+            // Generate a master key from the user's password
+            const { masterKey, salt } = await generateMasterKey(password);
+
             await createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
@@ -51,23 +71,30 @@ const SignupBody = () => {
                 await updateProfile(user, {
                     displayName: `${formState?.firstName} ${formState?.lastName}`
                 });
-    
-                // create a user in the user doc
+
+                // Encrypt private key using master key
+                const encryptedPrivateKey = CryptoJS.AES.encrypt(
+                    keyPair.privateKey,
+                    masterKey
+                ).toString();
+
+                
+                // Create a user in the user doc
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     ips: arrayUnion(ip),
                     firstName: formState?.firstName.charAt(0).toUpperCase() + formState?.firstName.slice(1).toLowerCase(),
                     lastName: formState?.lastName.charAt(0).toUpperCase() + formState?.lastName.slice(1).toLowerCase(),
-                    email: formState?.email
+                    email: formState?.email,
+                    salt: salt,
+                    pubKey: keyPair.publicKey,
+                    encryptedPrivateKey: encryptedPrivateKey,
                 });
-                
+
                 await setDoc(doc(db, "userChats", user.uid), {});
-
-                const keyPair = await generateRSAKeyPair();
-
-                await setDoc(doc(db, "pubKeys", user.uid), {
-                    pubKey: keyPair.publicKey
-                });
+    
+                // Store master key in local storage
+                localStorage.setItem('masterKey', masterKey);
 
                 navigate("/home");
             })
@@ -75,6 +102,7 @@ const SignupBody = () => {
             setError(true);
             const errorCode = error.code;
             const errorMessage = error.message;
+            console.log(errorMessage);
         });
     };
 
